@@ -1,0 +1,41 @@
+# Go binaries & test files
+*.exe
+*.test
+*.out
+
+# Build folders
+/build/
+/bin/
+
+# Workspace & vendor
+go.work
+go.work.sum
+/vendor/
+
+# Logs and temp
+*.log
+*.tmp
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.env
+.env.*
+docker-compose.override.yml
+**/.docker/
+
+# PostgreSQL data
+pgdata/
+*.sql
+*.dump
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git (optional)
+/.git/
