@@ -22,19 +22,20 @@ func AuthMiddleware(tokenRepo repository.TokenRepository) gin.HandlerFunc {
 			return
 		}
 
-		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 2 || parts[0] != "bearer" {
+		// The token is usually in the format "Bearer <token>"
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
 			log.Println("Invalid Authorization format")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization format must be Bearer <token>"})
 			c.Abort()
 			return
 		}
+
 		tokenString := parts[1]
 
 		// Fetch the token from the database
 		token, err := tokenRepo.FindByToken(tokenString)
 		if err != nil {
-			// Log the token lookup failure
 			log.Printf("Token lookup failed: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			c.Abort()
@@ -54,6 +55,5 @@ func AuthMiddleware(tokenRepo repository.TokenRepository) gin.HandlerFunc {
 
 		// Proceed to the next handler in the chain
 		c.Next()
-
 	}
 }

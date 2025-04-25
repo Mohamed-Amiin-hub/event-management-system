@@ -23,10 +23,11 @@ func RegisterUserRoutes(router *gin.Engine, userController *controller.UserContr
 		// Protected routes (require valid authentication)
 		userGroup.Use(authMiddleware) // Apply middleware here without additional braces
 		{
-			userGroup.PUT("/:id", userController.UpdateUser)    // Route for updating user information (protected)
-			userGroup.DELETE("/:id", userController.DeleteUser) // Route for deactivating a user (protected)
-			userGroup.GET("/:id", userController.GetUserByID)   // Route for getting a user by ID (protected)
-			userGroup.GET("", userController.ListUsers)         // Route for listing all users (protected)
+			userGroup.PUT("/:id", userController.UpdateUser)    // Route for updating user information
+			userGroup.DELETE("/:id", userController.DeleteUser) // Route for deactivating a user
+			userGroup.GET("/:id", userController.GetUserByID)   // Route for getting a user by ID
+			userGroup.GET("", userController.ListUsers)         // Route for listing all users
 		}
 	}
+
 }

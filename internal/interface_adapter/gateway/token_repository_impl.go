@@ -29,6 +29,8 @@ func (t *tokenRepositoryImpl) FindByToken(token string) (*entity.Token, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("token not found")
+			//return nil, errors.New("token not found")
+			return nil, nil
 		}
 		return nil, err
 	}
@@ -37,19 +39,25 @@ func (t *tokenRepositoryImpl) FindByToken(token string) (*entity.Token, error) {
 
 // Create implements repository.TokenRepository.
 func (t *tokenRepositoryImpl) Create(token *entity.Token) error {
-	query := `INSERT INTO tokens (id, user_id, tokens, expires_at, created_at, updated_at)
-	    VALUES($1, $2, $3, $4, $5, $6)`
-	result, err := t.db.Exec(query, token.ID, token.UserID, token.Token, token.ExpiresAt, time.Now(), time.Now())
+	// ❌ Fix: Column name was "tokens" — should be "token" (as per SELECT query)
+	query := `INSERT INTO tokens (id, user_id, token, expires_at, created_at, updated_at)
+	          VALUES($1, $2, $3, $4, $5, $6)`
+
+	// ✅ Use time.Now().UTC() for consistency
+	now := time.Now().UTC()
+
+	result, err := t.db.Exec(query, token.ID, token.UserID, token.Token, token.ExpiresAt, now, now)
 	if err != nil {
 		log.Printf("Error inserting token: %v", err)
+		return err // ❌ Missing return on insert error
 	}
 
-	RowsAffected, err := result.RowsAffected()
+	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		log.Printf("Error fetching rows affected: %v", err)
 		return err
 	}
 
-	log.Printf("Rows affected: %d", RowsAffected)
+	log.Printf("Rows affected: %d", rowsAffected)
 	return nil
 }

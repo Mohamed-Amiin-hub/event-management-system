@@ -10,7 +10,6 @@ import (
 	"example.com/EVENT-MANAGEMENT-SYSTEM/internal/entity"
 	"example.com/EVENT-MANAGEMENT-SYSTEM/internal/repository"
 	"github.com/gofrs/uuid"
-	//"github.com/google/uuid"
 )
 
 // userRepositoryImpl is the implementation of UserRepository.
@@ -76,25 +75,25 @@ func (u *userRepositoryImpl) Create(user *entity.User) error {
 // Update implements repository.UserRepository.
 func (u *userRepositoryImpl) Update(user *entity.User) error {
 	query := `UPDATE users
-	          SET username = $1, email = $2, password = $3, first_name = $4, last_name =$5, is_active =$6, updated_at = $7
-			  WHERE id $8`
+	          SET username = $1, email = $2, password = $3, first_name = $4, last_name = $5, is_active =$6, updated_at = $7
+			  WHERE id = $8`
 
 	// Execute the update query with the user data
-	result, err := u.db.Exec(query, user.Username, user.Email, user.FirstName, user.LastName, user.IsActive, time.Now(), user.ID)
+	result, err := u.db.Exec(query, user.Username, user.Email, user.Password, user.FirstName, user.LastName, user.IsActive, time.Now(), user.ID)
 	if err != nil {
 		log.Printf("Error updating user with ID: %v, error: %v", user.ID, err)
 		return err
 	}
 
 	// Check how many rows were affected by the update
-	rowsaffected, err := result.RowsAffected()
+	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		log.Printf("Error fetching rows affected: %v", err)
 		return err
 	}
 
 	// If no rows were affected, it means the user was not found
-	if rowsaffected == 0 {
+	if rowsAffected == 0 {
 		log.Printf("No user found with ID: %v", user.ID)
 		return fmt.Errorf("user not found")
 	}
@@ -123,7 +122,7 @@ func (u *userRepositoryImpl) Delete(userID uuid.UUID) error {
 
 	// If no rows were affected, it means the user was not found
 	if rowsAffected == 0 {
-		log.Printf("No user found with ID: %v", err)
+		log.Printf("No user found with ID: %v", userID)
 		return fmt.Errorf("user not found")
 	}
 
@@ -145,7 +144,7 @@ func (u *userRepositoryImpl) FindByID(userID uuid.UUID) (*entity.User, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No user found with ID: %v", userID)
-			return nil, fmt.Errorf("user not found")
+			return nil, fmt.Errorf("user with ID %v not found", userID)
 		}
 		log.Printf("Error retrieving user by ID: %v", err)
 		return nil, err
@@ -161,7 +160,7 @@ func (u *userRepositoryImpl) FindByEmail(email string) (*entity.User, error) {
 	query := "SELECT id, username, email, password, first_name, last_name, is_active, created_at, updated_at FROM users WHERE email = $1"
 	row := u.db.QueryRow(query, email)
 
-	err := row.Scan(user.ID, user.Username, user.Email, user.Password, user.FirstName, user.LastName, user.IsActive, user.CreatedAt, user.UpdatedAt)
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			return nil, errors.New("user not found")
@@ -187,7 +186,7 @@ func (u *userRepositoryImpl) ListAll() ([]*entity.User, error) {
 	var users []*entity.User
 	for rows.Next() {
 		var user entity.User
-		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

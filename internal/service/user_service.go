@@ -112,11 +112,12 @@ func (s *UserServiceImpl) AuthenticateUser(email, password string) (*entity.User
 		return nil, errors.New("failed to generate token")
 	}
 
+	// Create token entity
 	token := &entity.Token{
-		ID:        newToken,
-		UserID:    user.ID,
-		Token:     newToken.String(),
-		ExpiresAt: time.Now().Add(24 * time.Hour),
+		ID:        newToken,                       // Token ID
+		UserID:    user.ID,                        // Associate token with the user's ID
+		Token:     newToken.String(),              // The actual token string
+		ExpiresAt: time.Now().Add(24 * time.Hour), // Set token expiration (1 day in this example)
 	}
 
 	// Store the token in the database

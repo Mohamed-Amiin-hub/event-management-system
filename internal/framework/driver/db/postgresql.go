@@ -43,6 +43,23 @@ func CreateTables(db *sql.DB) error {
 	deleted_at TIMESTAMP
 	);`
 
+	//
+	eventTable := `CREATE TABLE IF NOT EXISTS events (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			title VARCHAR(255) NOT NULL,
+			description TEXT,
+			location VARCHAR(255),
+			start_time TIMESTAMP NOT NULL,
+			end_time TIMESTAMP,
+			capacity INTEGER NOT NULL CHECK (capacity >= 0),
+			is_public BOOLEAN DEFAULT true,
+			status TEXT NOT NULL,
+			organizer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			deleted_at TIMESTAMP NULL
+			);`
+
 	// Create tokens table
 	tokenTable := `CREATE TABLE IF NOT EXISTS tokens (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -82,7 +99,7 @@ func CreateTables(db *sql.DB) error {
 	);`
 
 	// Execute the table creation queries
-	query := []string{userTable, tokenTable, roleTable, permissionTable, createRoleTable, userPermissionTable}
+	query := []string{userTable, tokenTable, roleTable, permissionTable, createRoleTable, userPermissionTable, eventTable}
 	for _, query := range query {
 		if _, err := db.Exec(query); err != nil {
 			return fmt.Errorf("failed to create table: %v", err)

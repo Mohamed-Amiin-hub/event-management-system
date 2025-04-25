@@ -38,6 +38,7 @@ func (uc *UserController) RegisterUser(c *gin.Context) {
 	if err != nil {
 		log.Printf("Error registering user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, createdUser)
@@ -57,14 +58,14 @@ func (uc *UserController) AuthenticateUser(c *gin.Context) {
 	log.Printf("Bound User Struct: %+v", user)
 
 	// Call the service layer to handle user authentication
-	authenticateUser, err := uc.userService.AuthenticateUser(user.Email, user.Password)
+	authenticatedUser, err := uc.userService.AuthenticateUser(user.Email, user.Password)
 	if err != nil {
-		log.Printf("error to authenticate user: %v", err)
+		log.Printf("Error authenticating user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	c.JSON(http.StatusOK, authenticateUser)
-
+	c.JSON(http.StatusOK, authenticatedUser)
 }
 
 // update user
@@ -110,12 +111,14 @@ func (uc *UserController) DeleteUser(c *gin.Context) {
 	if err != nil {
 		log.Printf("Invalid user ID: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
 	}
 
 	// Call the service layer to handle user deletion
 	if err := uc.userService.DeleteUser(userID); err != nil {
 		log.Printf("Error deleting user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	// Respond with success

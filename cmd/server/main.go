@@ -46,12 +46,14 @@ func main() {
 	// Initialize the repositories
 	userRepository := gateway.NewUserRepository(database)
 	tokenRepository := gateway.NewTokenRepository(database)
+	eventRepository := gateway.NewEventRepository(database)
 
 	// Initialize the services
 	userService := service.NewUserService(userRepository, tokenRepository)
-
+	eventService := service.NewEventService(eventRepository, tokenRepository)
 	// Initialize the controllers
 	userController := controller.NewUserController(userService)
+	eventController := controller.NewEventController(eventService)
 
 	r := gin.Default()
 	// Apply CORS middleware
@@ -64,6 +66,7 @@ func main() {
 	}))
 
 	routes.RegisterUserRoutes(r, userController, tokenRepository)
+	routes.RegistereventsRoutes(r, eventController, tokenRepository)
 
 	// Start the server
 	if err := r.Run(":8080"); err != nil {
